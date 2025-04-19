@@ -8,8 +8,7 @@ from django.conf.urls import handler404
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('auth/', include('App_Auth.urls')),
-    path('', include('App_Ecommerce.urls')),
+    path('api/', include('Crawler.urls')),
 ]
 
 urlpatterns += static(settings.MEDIA_URL,document_root = settings.MEDIA_ROOT)
