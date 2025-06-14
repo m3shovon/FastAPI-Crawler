@@ -1,8 +1,8 @@
 import httpx
-from bs4 import BeautifulSoup
+from bs4 import BeautifulSoup, Comment
 from urllib.parse import urljoin, urlparse
 from collections import deque
-from typing import Set
+from typing import Set, List, Dict
 
 async def fetch_html(client, url):
     try:
@@ -36,3 +36,24 @@ async def crawl_website(start_url: str):
                     queue.append(full_url)
 
     return list(visited)
+
+async def extract_page_content(url: str) -> str:
+    try:
+        async with httpx.AsyncClient() as client:
+            response = await client.get(url, timeout=10)
+            if response.status_code != 200:
+                return "Failed to fetch the page"
+
+            soup = BeautifulSoup(response.text, "html.parser")
+
+            # Remove script, style, and comments
+            for tag in soup(["script", "style"]):
+                tag.decompose()
+            for element in soup(text=lambda text: isinstance(text, Comment)):
+                element.extract()
+
+            text = soup.get_text(separator="\n", strip=True)
+            return text
+
+    except Exception as e:
+        return f"Error occurred: {str(e)}"
